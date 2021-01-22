@@ -49,6 +49,7 @@ const LetterQuestionView: React.FC<LetterQuestionProps> = (props) => {
         </SearchQuestion>
         <SearchInputWrapper>
           <TextInput
+            placeholder="Enter letter"
             maxLength={1}
             value={letter}
             onChange={handleChange}
