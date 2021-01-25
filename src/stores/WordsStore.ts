@@ -5,15 +5,30 @@ const randomWordsLength = 5;
 
 export class WordsStore {
   public words: Word[] = [];
+  public readonly letters = {
+    startsWith: '',
+    endsWith: '',
+    contains: '',
+  };
 
   constructor() {
     makeObservable(this, {
       words: observable,
+      letters: observable,
       total: computed,
       countByLetterConjunctionInDictionary: computed,
       wordsWithConjunction: computed,
       addWord: action,
+      setCapitalLetter: action,
+      setLastLetter: action,
       generateRandomWords: action,
+      setContainsLetter: action,
+      countByCapitalLetter: computed,
+      countByLastLetter: computed,
+      countByLetterInDictionary: computed,
+      wordsWithCapitalLetter: computed,
+      wordsWithLastLetter: computed,
+      wordsWithLetter: computed,
     });
   }
 
@@ -21,7 +36,7 @@ export class WordsStore {
     return this.words.length;
   }
 
-  get wordsWithConjunction() {
+  get wordsWithConjunction(): Word[] {
     return this.words.filter(word => Boolean(word.match(/(.)\1{1,}/gi)));
   }
 
@@ -40,27 +55,47 @@ export class WordsStore {
     this.words = [ ...newWords, ...this.words ]
   };
 
-  countByCapitalLetter = (letter: string): number => {
-    return this.wordsWithCapitalLetter(letter).length;
+  get countByCapitalLetter(): number {
+    return this.wordsWithCapitalLetter.length;
   };
 
-  countByLastLetter = (letter: string): number => {
-    return this.wordsWithLastLetter(letter).length;
+  get countByLastLetter(): number {
+    return this.wordsWithLastLetter.length;
   };
 
-  countByLetterInDictionary = (letter: string): number => {
-    return this.words.reduce((acc, word) => acc + word.split(new RegExp(letter, 'gi')).length - 1, 0);
+  get countByLetterInDictionary(): number {
+    const { contains } = this.letters;
+    return contains
+      ? this.words.reduce((acc, word) => acc + word.split(new RegExp(contains, 'gi')).length - 1, 0)
+      : 0;
   };
 
-  wordsWithCapitalLetter = (letter: string): Word[] => {
-    return this.words.filter(word => word[0].toUpperCase() === letter.toUpperCase());
+  get wordsWithCapitalLetter(): Word[] {
+    const { startsWith } = this.letters;
+    return this.words.filter(word => word[0].toUpperCase() === startsWith.toUpperCase());
   };
 
-  wordsWithLastLetter = (letter: string): Word[] => {
-    return this.words.filter(word => word[word.length - 1].toUpperCase() === letter.toUpperCase());
+  get wordsWithLastLetter(): Word[] {
+    const { endsWith } = this.letters;
+    return this.words.filter(word => word[word.length - 1].toUpperCase() === endsWith.toUpperCase());
   };
 
-  wordsWithLetter = (letter: string): Word[] => {
-    return this.words.filter(word => word.includes(letter));
+  get wordsWithLetter(): Word[] {
+    const { contains } = this.letters;
+    return contains
+      ? this.words.filter(word => word.includes(contains))
+      : [];
   };
+
+  setCapitalLetter = (letter: string): void => {
+    this.letters.startsWith = letter;
+  };
+
+  setLastLetter = (letter: string): void => {
+    this.letters.endsWith = letter;
+  };
+
+  setContainsLetter = (letter: string): void => {
+    this.letters.contains = letter;
+  }
 }
